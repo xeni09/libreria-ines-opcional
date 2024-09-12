@@ -5,7 +5,7 @@ def call(Map params = [:]) {
 
     timeout(time: 5, unit: 'MINUTES') {
         // Configuración del entorno de SonarQube
-        withSonarQubeEnv('SonarQube') {
+        withSonarQubeEnv('Sonar Local') {
             // Ejecuta el análisis de SonarQube
             sh "sonar-scanner \
                 -Dsonar.projectKey=ejercicio2-Ines \
@@ -13,7 +13,7 @@ def call(Map params = [:]) {
                 -Dsonar.host.url=http://localhost:9000 \
                 -Dsonar.login=admin \
                 -Dsonar.password=threepoints"
-
+            
             // Espera el resultado del QualityGate
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {
