@@ -1,11 +1,14 @@
+def call(Map params = [:]) {
+    // Obtener los parámetros con valores predeterminados
+    boolean abortOnQualityGateFail = params.get('abortOnQualityGateFail', false)
+    boolean abortPipeline = params.get('abortPipeline', false)
 
-def call(boolean abortOnQualityGateFail = false, boolean abortPipeline = false) {
     timeout(time: 5, unit: 'MINUTES') {
         // Configuración del entorno de SonarQube
         withSonarQubeEnv('SonarQube') {
             // Ejecuta el análisis de SonarQube
             sh "sonar-scanner \
-                -Dsonar.projectKey=ejercicio2-ines \
+                -Dsonar.projectKey=ejercicio2-Ines \
                 -Dsonar.sources=./src \
                 -Dsonar.host.url=http://localhost:9000 \
                 -Dsonar.login=admin \
