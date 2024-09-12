@@ -6,8 +6,9 @@ def call(Map params = [:]) {
     timeout(time: 5, unit: 'MINUTES') {
         // Configuración del entorno de SonarQube
         withSonarQubeEnv('Sonar Local') {
-            // Ejecuta el análisis de SonarQube
-            sh "sonar-scanner \
+            // Usar el SonarQube Scanner configurado en Jenkins
+            def scannerHome = tool 'sonar-scanner'
+            sh "${scannerHome}/bin/sonar-scanner \
                 -Dsonar.projectKey=ejercicio2-Ines \
                 -Dsonar.sources=./src \
                 -Dsonar.host.url=http://localhost:9000 \
