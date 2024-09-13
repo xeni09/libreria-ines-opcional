@@ -1,5 +1,4 @@
 def call(Map params = [:]) {
-    // Obtener los parámetros con valores predeterminados
     boolean abortOnQualityGateFail = params.get('abortOnQualityGateFail', false)
     boolean abortPipeline = params.get('abortPipeline', false)
 
@@ -8,12 +7,14 @@ def call(Map params = [:]) {
         withSonarQubeEnv('Sonar Local') {
             // Usar el SonarQube Scanner configurado en Jenkins
             def scannerHome = tool 'sonar-scanner'
-            sh "${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=ejercicio2-Ines \
-                -Dsonar.sources=./src \
-                -Dsonar.host.url=http://localhost:9000 \
-                -Dsonar.login=admin \
-                -Dsonar.password=threepoints"
+            withCredentials([usernamePassword(credentialsId: 'Credentials_Threepoints', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASS')]) {
+                sh "${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=ejercicio2-Ines \
+                    -Dsonar.sources=./src \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=${SONAR_USER} \
+                    -Dsonar.password=${SONAR_PASS}"
+            }
             
             // Espera el resultado del QualityGate
             def qg = waitForQualityGate()
