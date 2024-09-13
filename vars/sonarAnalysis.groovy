@@ -5,17 +5,16 @@ def call(Map params = [:]) {
     timeout(time: 5, unit: 'MINUTES') {
         // Configuración del entorno de SonarQube
         withSonarQubeEnv('Sonar Local') {
-            // Usar el SonarQube Scanner configurado en Jenkins
             def scannerHome = tool 'sonar-scanner'
-            withCredentials([usernamePassword(credentialsId: 'Credentials_Threepoints', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASS')]) {
+            // Usar el token almacenado en Jenkins
+            withCredentials([string(credentialsId: 'jenkinsToken', variable: 'SONAR_TOKEN')]) {
                 sh "${scannerHome}/bin/sonar-scanner \
                     -Dsonar.projectKey=ejercicio2-Ines \
                     -Dsonar.sources=./src \
                     -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=${SONAR_USER} \
-                    -Dsonar.password=${SONAR_PASS}"
+                    -Dsonar.login=${SONAR_TOKEN}"
             }
-            
+
             // Espera el resultado del QualityGate
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {
