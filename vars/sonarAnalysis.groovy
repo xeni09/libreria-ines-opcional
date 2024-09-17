@@ -2,11 +2,10 @@ def call(Map config = [:]) {
     def abortPipeline = config.get('abortPipeline', false)
     def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
 
-    // Invocar SonarQube análisis
     echo "Ejecución de las pruebas de calidad de código"
 
     withSonarQubeEnv('Sonar Local') {
-        // Asegurarse de que la ruta de sonar-scanner está incluida
+        // Ejecutar el análisis con sonar-scanner
         sh '''
         export PATH=$PATH:/opt/homebrew/bin && sonar-scanner \
           -Dsonar.projectKey=threepoints_devops_webserver_ines \
@@ -14,12 +13,12 @@ def call(Map config = [:]) {
           -Dsonar.sources=./src \
           -Dsonar.host.url=http://localhost:9000
         '''
-        
-        // Aumentar el tiempo de espera para dar más tiempo a SonarQube
-        sh 'sleep 30'
 
-        // Esperar el resultado del Quality Gate dentro del mismo bloque withSonarQubeEnv
-        timeout(time: 5, unit: 'MINUTES') {
+        // Aumentar el tiempo de espera para el servidor de SonarQube
+        sh 'sleep 60'
+
+        // Esperar el resultado del Quality Gate
+        timeout(time: 10, unit: 'MINUTES') {
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
