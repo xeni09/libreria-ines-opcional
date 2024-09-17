@@ -5,19 +5,22 @@ def call(Map config = [:]) {
     // Invocar SonarQube análisis
     echo "Ejecución de las pruebas de calidad de código"
 
-    // Realizar el análisis de SonarQube
     withSonarQubeEnv('Sonar Local') {
-        // Simulación del análisis o reemplazo por comando real de SonarQube
-        sh 'echo "Realizando análisis de SonarQube..."'
+        // Ejecutar análisis de SonarQube real
+        sh '''
+        sonar-scanner \
+          -Dsonar.projectKey=threepoints_devops_webserver_ines \
+          -Dsonar.projectName="DevOps Web Server Ines" \
+          -Dsonar.sources=./src \
+          -Dsonar.host.url=http://localhost:9000
+        '''
         
-        // Agregar un retardo para asegurar que el análisis sea procesado antes de verificar el Quality Gate
+        // Agregar un retardo si es necesario
         sh 'sleep 10'
 
-        // Timeout para el Quality Gate
+        // Esperar el resultado del Quality Gate
         timeout(time: 5, unit: 'MINUTES') {
             def qg = waitForQualityGate()
-
-            // Evaluar el resultado del Quality Gate
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
                 if (abortPipeline || abortOnQualityGateFail) {
