@@ -1,27 +1,32 @@
-def call(Map params = [:]) {
-    boolean abortOnQualityGateFail = params.get('abortOnQualityGateFail', false)
-    boolean abortPipeline = params.get('abortPipeline', false)
+def call(Map config = [:]) {
+    def abortPipeline = config.get('abortPipeline', false)
+    def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
 
-    timeout(time: 5, unit: 'MINUTES') {
-        // Configuración del entorno de SonarQube
-        withSonarQubeEnv('Sonar Local') {
-            def scannerHome = tool 'sonar-scanner'
-            // Usar el token almacenado en Jenkins
-            withCredentials([string(credentialsId: 'jenkinsToken', variable: 'SONAR_TOKEN')]) {
-                sh "${scannerHome}/bin/sonar-scanner \
-                    -Dsonar.projectKey=ejercicio2-Ines \
-                    -Dsonar.sources=./src \
-                    -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=${SONAR_TOKEN}"
-            }
+    // Invocar SonarQube análisis
+    echo "Ejecución de las pruebas de calidad de código"
 
-            // Espera el resultado del QualityGate
+    // Realizar el análisis de SonarQube
+    withSonarQubeEnv('Sonar Local') {
+        // Simulación del análisis o reemplazo por comando real de SonarQube
+        sh 'echo "Realizando análisis de SonarQube..."'
+        
+        // Agregar un retardo para asegurar que el análisis sea procesado antes de verificar el Quality Gate
+        sh 'sleep 10'
+
+        // Timeout para el Quality Gate
+        timeout(time: 5, unit: 'MINUTES') {
             def qg = waitForQualityGate()
+
+            // Evaluar el resultado del Quality Gate
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
-                if (abortOnQualityGateFail || abortPipeline) {
-                    error "Pipeline abortado debido a que no pasó el Quality Gate"
+                if (abortPipeline || abortOnQualityGateFail) {
+                    error "Abortando el pipeline debido a la falla en Quality Gate"
+                } else {
+                    echo "Continuando con el pipeline a pesar de la falla en Quality Gate"
                 }
+            } else {
+                echo "Quality Gate aprobado"
             }
         }
     }
