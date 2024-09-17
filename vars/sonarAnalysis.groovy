@@ -15,8 +15,8 @@ def call(Map config = [:]) {
           -Dsonar.host.url=http://localhost:9000
         '''
         
-        // Agregar un retardo si es necesario
-        sh 'sleep 10'
+        // Aumentar el tiempo de espera para dar más tiempo a SonarQube
+        sh 'sleep 30'
 
         // Esperar el resultado del Quality Gate dentro del mismo bloque withSonarQubeEnv
         timeout(time: 5, unit: 'MINUTES') {
