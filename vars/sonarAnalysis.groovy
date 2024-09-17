@@ -6,9 +6,9 @@ def call(Map config = [:]) {
     echo "Ejecución de las pruebas de calidad de código"
 
     withSonarQubeEnv('Sonar Local') {
-        // Ejecutar análisis de SonarQube real
+        // Asegurarse de que la ruta de sonar-scanner está incluida
         sh '''
-        sonar-scanner \
+        export PATH=$PATH:/opt/homebrew/bin && sonar-scanner \
           -Dsonar.projectKey=threepoints_devops_webserver_ines \
           -Dsonar.projectName="DevOps Web Server Ines" \
           -Dsonar.sources=./src \
