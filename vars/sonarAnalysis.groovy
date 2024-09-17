@@ -2,7 +2,7 @@ def call(Map config = [:]) {
     def abortPipeline = config.get('abortPipeline', false)
     def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
 
-    echo "Ejecución de las pruebas de calidad de código"
+    echo "Ejecución de las pruebas de calidad de código con SonarQube"
 
     withSonarQubeEnv('Sonar Local') {
         // Ejecutar el análisis con sonar-scanner
