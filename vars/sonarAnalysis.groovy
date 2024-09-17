@@ -14,7 +14,7 @@ def call(Map config = [:]) {
           -Dsonar.host.url=http://localhost:9000
         '''
 
-        // Aumentar el tiempo de espera para el servidor de SonarQube
+        // Añadir un tiempo de espera para asegurar que el servidor procese el análisis
         sh 'sleep 60'
 
         // Esperar el resultado del Quality Gate
@@ -23,9 +23,9 @@ def call(Map config = [:]) {
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
                 if (abortPipeline || abortOnQualityGateFail) {
-                    error "Abortando el pipeline debido a la falla en Quality Gate"
+                    error "Abortando el pipeline debido a la falla en el Quality Gate"
                 } else {
-                    echo "Continuando con el pipeline a pesar de la falla en Quality Gate"
+                    echo "Continuando con el pipeline a pesar de la falla en el Quality Gate"
                 }
             } else {
                 echo "Quality Gate aprobado"
