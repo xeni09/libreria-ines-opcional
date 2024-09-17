@@ -18,7 +18,7 @@ def call(Map config = [:]) {
         // Agregar un retardo si es necesario
         sh 'sleep 10'
 
-        // Esperar el resultado del Quality Gate
+        // Esperar el resultado del Quality Gate dentro del mismo bloque withSonarQubeEnv
         timeout(time: 5, unit: 'MINUTES') {
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {
