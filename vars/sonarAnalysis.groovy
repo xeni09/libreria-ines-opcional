@@ -1,6 +1,7 @@
 def call(Map config = [:]) {
     def abortPipeline = config.get('abortPipeline', false)
     def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
+    def branchName = env.BRANCH_NAME
 
     echo "Ejecución de las pruebas de calidad de código con SonarQube"
 
@@ -15,14 +16,14 @@ def call(Map config = [:]) {
         '''
 
         // Añadir un tiempo de espera para asegurar que el servidor procese el análisis
-        sh 'sleep 10'
+        sh 'sleep 30'
 
         // Esperar el resultado del Quality Gate
-        timeout(time: 5, unit: 'MINUTES') {
+        timeout(time: 10, unit: 'MINUTES') {
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
-                if (abortPipeline || abortOnQualityGateFail) {
+                if (abortPipeline || abortOnQualityGateFail || branchName == 'master' || branchName.startsWith('hotfix')) {
                     error "Abortando el pipeline debido a la falla en el Quality Gate"
                 } else {
                     echo "Continuando con el pipeline a pesar de la falla en el Quality Gate"
