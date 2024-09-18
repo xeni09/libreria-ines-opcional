@@ -18,7 +18,7 @@ def call(Map config = [:]) {
         sh 'sleep 60'
 
         // Esperar el resultado del Quality Gate
-        timeout(time: 10, unit: 'MINUTES') {
+        timeout(time: 5, unit: 'MINUTES') {
             def qg = waitForQualityGate()
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
