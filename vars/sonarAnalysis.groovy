@@ -1,7 +1,7 @@
 def call(Map config = [:]) {
     def abortPipeline = config.get('abortPipeline', false)
     def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
-    def branchName = env.BRANCH_NAME
+    def branchName = config.get('branchName', env.BRANCH_NAME)
 
     if (branchName == null) {
         error "La variable de entorno BRANCH_NAME no está configurada."
