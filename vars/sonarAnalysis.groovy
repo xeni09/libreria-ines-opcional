@@ -15,7 +15,7 @@ def call(Map config = [:]) {
         '''
 
         // Añadir un tiempo de espera para asegurar que el servidor procese el análisis
-        sh 'sleep 60'
+        sh 'sleep 10'
 
         // Esperar el resultado del Quality Gate
         timeout(time: 5, unit: 'MINUTES') {
