@@ -3,6 +3,10 @@ def call(Map config = [:]) {
     def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
     def branchName = env.BRANCH_NAME
 
+    if (branchName == null) {
+        error "La variable de entorno BRANCH_NAME no está configurada."
+    }
+
     echo "Ejecución de las pruebas de calidad de código con SonarQube en la rama ${branchName}"
 
     withSonarQubeEnv('Sonar Local') {
@@ -12,7 +16,7 @@ def call(Map config = [:]) {
         // Esperar el resultado del Quality Gate
         timeout(time: 5, unit: 'MINUTES') {
             // Simular el resultado del Quality Gate
-            def qg = [status: 'OK'] // Cambiar a 'ERROR' para simular fallo
+            def qg = [status: 'ERROR'] // Cambiar a 'OK' para simular éxito
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
                 if (abortPipeline || abortOnQualityGateFail || branchName == 'master' || branchName.startsWith('hotfix')) {
