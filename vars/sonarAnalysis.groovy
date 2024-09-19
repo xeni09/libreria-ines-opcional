@@ -18,12 +18,12 @@ def call(Map config = [:]) {
         // Esperar el resultado del Quality Gate con un timeout de 5 minutos
         timeout(time: 5, unit: 'MINUTES') {
             // Simular el resultado del Quality Gate (puedes cambiar a waitForQualityGate() si es necesario)
-            def qg = [status: 'OK'] // Cambia a 'ERROR' para simular un fallo
+            def qg = [status: 'ERROR'] // Cambia a 'OK' para simular un fallo
 
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
 
-                // Evaluar si debe abortar el pipeline
+                // Evaluar si debe abortar el pipeline según la heurística
                 if (abortPipeline || abortOnQualityGateFail || shouldAbort(branchName)) {
                     error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
                 } else {
