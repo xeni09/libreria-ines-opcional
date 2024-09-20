@@ -10,25 +10,32 @@ def call(Map config = [:]) {
 
     echo "Ejecución de las pruebas de calidad de código en la rama: ${branchName}"
 
-    withSonarQubeEnv('SonarQube') {
-        // Ejecutar el análisis real con SonarQube
-        sh 'sonar-scanner'
+    // Usar el entorno de SonarQube configurado en Jenkins
+    withSonarQubeEnv('Sonar Local') {
+        try {
+            // Ejecutar el análisis real con SonarQube
+            echo "Ejecutando sonar-scanner..."
+            sh 'sonar-scanner'
 
-        // Esperar el resultado del Quality Gate con timeout de 5 minutos
-        timeout(time: 5, unit: 'MINUTES') {
-            def qualityGate = waitForQualityGate()
-            if (qualityGate.status != 'OK') {
-                echo "Quality Gate status: ${qualityGate.status}"
+            // Esperar el resultado del Quality Gate con timeout de 5 minutos
+            timeout(time: 5, unit: 'MINUTES') {
+                def qualityGate = waitForQualityGate()
+                if (qualityGate.status != 'OK') {
+                    echo "Quality Gate status: ${qualityGate.status}"
 
-                // Evaluar si debe abortar el pipeline según la heurística
-                if (abortPipeline || shouldAbort(branchName)) {
-                    error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
+                    // Evaluar si debe abortar el pipeline según la heurística
+                    if (abortPipeline || shouldAbort(branchName)) {
+                        error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
+                    } else {
+                        echo "Continuando con el pipeline a pesar de la falla."
+                    }
                 } else {
-                    echo "Continuando con el pipeline a pesar de la falla."
+                    echo "Quality Gate aprobado"
                 }
-            } else {
-                echo "Quality Gate aprobado"
             }
+        } catch (Exception e) {
+            echo "Error durante la ejecución del análisis de SonarQube: ${e.getMessage()}"
+            error "Error en el análisis de SonarQube."
         }
     }
 }
