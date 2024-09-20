@@ -1,49 +1,28 @@
 def call(Map config = [:]) {
-    // Obtener los parámetros pasados desde el pipeline
+    // Parámetros con valores predeterminados
     def abortPipeline = config.get('abortPipeline', false)
-    def branchName = config.get('branchName', env.BRANCH_NAME ?: 'unknown')
+    def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
 
-    // Verificar si la variable de entorno BRANCH_NAME está disponible
-    if (branchName == 'unknown') {
-        error "El nombre de la rama no se pudo capturar."
-    }
+    echo "Ejecución de las pruebas de calidad de código"
 
-    echo "Ejecución de las pruebas de calidad de código en la rama: ${branchName}"
+    // Simular el análisis estático de código
+    sh 'echo "Ejecución de las pruebas de calidad de código"'
 
-    // Usar el entorno de SonarQube configurado en Jenkins
-    withSonarQubeEnv('Sonar Local') {
-        try {
-            // Ejecutar el análisis real con SonarQube
-            echo "Ejecutando sonar-scanner..."
-            sh 'sonar-scanner'
+    // Esperar el resultado del Quality Gate con un timeout de 5 minutos
+    timeout(time: 5, unit: 'MINUTES') {
+        // Simular el resultado del Quality Gate (puedes cambiar 'ERROR' a 'OK' para simular éxito)
+        def qg = [status: 'ERROR'] // 'OK' para éxito, 'ERROR' para fallo
+        echo "Quality Gate status: ${qg.status}"
 
-            // Esperar el resultado del Quality Gate con timeout de 5 minutos
-            timeout(time: 5, unit: 'MINUTES') {
-                def qualityGate = waitForQualityGate()
-                if (qualityGate.status != 'OK') {
-                    echo "Quality Gate status: ${qualityGate.status}"
-
-                    // Evaluar si debe abortar el pipeline según la heurística
-                    if (abortPipeline || shouldAbort(branchName)) {
-                        error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
-                    } else {
-                        echo "Continuando con el pipeline a pesar de la falla."
-                    }
-                } else {
-                    echo "Quality Gate aprobado"
-                }
+        // Evaluar el resultado del Quality Gate y los parámetros booleanos
+        if (qg.status != 'OK') {
+            if (abortPipeline || abortOnQualityGateFail) {
+                error "Abortando el pipeline debido al error en el Quality Gate"
+            } else {
+                echo "Continuando con el pipeline a pesar del error en el Quality Gate"
             }
-        } catch (Exception e) {
-            echo "Error durante la ejecución del análisis de SonarQube: ${e.getMessage()}"
-            error "Error en el análisis de SonarQube."
+        } else {
+            echo "Quality Gate aprobado"
         }
     }
-}
-
-// Función auxiliar para decidir si abortar el pipeline según el nombre de la rama
-def shouldAbort(String branchName) {
-    if (branchName == 'master' || branchName.startsWith('hotfix')) {
-        return true
-    }
-    return false
 }
