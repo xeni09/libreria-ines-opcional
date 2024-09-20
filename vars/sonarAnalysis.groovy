@@ -10,8 +10,8 @@ def call(Map config = [:]) {
 
     // Esperar el resultado del Quality Gate con un timeout de 5 minutos
     timeout(time: 5, unit: 'MINUTES') {
-        // Simular el resultado del Quality Gate (puedes cambiar 'ERROR' a 'OK' para simular éxito)
-        def qg = [status: 'ERROR'] // 'OK' para éxito, 'ERROR' para fallo
+        // Simular el resultado del Quality Gate
+        def qg = [status: 'ERROR'] // Cambia a 'OK' para simular éxito
         echo "Quality Gate status: ${qg.status}"
 
         // Evaluar el resultado del Quality Gate y los parámetros booleanos
