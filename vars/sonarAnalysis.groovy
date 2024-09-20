@@ -9,16 +9,15 @@ def call(Map config = [:]) {
         error "El nombre de la rama no se pudo capturar."
     }
 
-    echo "Ejecución de las pruebas de calidad de código con SonarQube en la rama: ${branchName}"
+    echo "Ejecución de las pruebas de calidad de código en la rama: ${branchName}"
 
     withSonarQubeEnv('Sonar Local') {
-        // Ejecutar el análisis con sonar-scanner (puedes cambiar a sonar-scanner real si lo deseas)
+        // Simular el análisis de calidad del código
         sh 'echo "Ejecución de las pruebas de calidad de código"'
 
-        // Esperar el resultado del Quality Gate con un timeout de 5 minutos
+        // Esperar el resultado del Quality Gate con timeout de 5 minutos
         timeout(time: 5, unit: 'MINUTES') {
-            // Simular el resultado del Quality Gate (puedes cambiar a waitForQualityGate() si es necesario)
-            def qg = [status: 'ERROR'] // Cambia a 'OK' para simular un fallo
+            def qg = [status: 'ERROR'] // Simulación del fallo del Quality Gate
 
             if (qg.status != 'OK') {
                 echo "Quality Gate status: ${qg.status}"
@@ -27,7 +26,7 @@ def call(Map config = [:]) {
                 if (abortPipeline || abortOnQualityGateFail || shouldAbort(branchName)) {
                     error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
                 } else {
-                    echo "Continuando con el pipeline a pesar de la falla en el Quality Gate en la rama: ${branchName}"
+                    echo "Continuando con el pipeline a pesar de la falla en el Quality Gate."
                 }
             } else {
                 echo "Quality Gate aprobado"
@@ -38,10 +37,8 @@ def call(Map config = [:]) {
 
 // Función auxiliar para decidir si abortar el pipeline según el nombre de la rama
 def shouldAbort(String branchName) {
-    // Si la rama es 'master' o empieza con 'hotfix', abortar el pipeline
     if (branchName == 'master' || branchName.startsWith('hotfix')) {
         return true
     }
-    // Para cualquier otra rama, no abortar
     return false
 }
