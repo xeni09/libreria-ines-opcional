@@ -1,7 +1,6 @@
 def call(Map config = [:]) {
     // Obtener los parámetros pasados desde el pipeline
     def abortPipeline = config.get('abortPipeline', false)
-    def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
     def branchName = config.get('branchName', env.BRANCH_NAME ?: 'unknown')
 
     // Verificar si la variable de entorno BRANCH_NAME está disponible
@@ -11,22 +10,21 @@ def call(Map config = [:]) {
 
     echo "Ejecución de las pruebas de calidad de código en la rama: ${branchName}"
 
-    withSonarQubeEnv('Sonar Local') {
-        // Simular el análisis de calidad del código
-        sh 'echo "Ejecución de las pruebas de calidad de código"'
+    withSonarQubeEnv('SonarQube') {
+        // Ejecutar el análisis real con SonarQube
+        sh 'sonar-scanner'
 
         // Esperar el resultado del Quality Gate con timeout de 5 minutos
         timeout(time: 5, unit: 'MINUTES') {
-            def qg = [status: 'ERROR'] // Simulación del fallo del Quality Gate
-
-            if (qg.status != 'OK') {
-                echo "Quality Gate status: ${qg.status}"
+            def qualityGate = waitForQualityGate()
+            if (qualityGate.status != 'OK') {
+                echo "Quality Gate status: ${qualityGate.status}"
 
                 // Evaluar si debe abortar el pipeline según la heurística
-                if (abortPipeline || abortOnQualityGateFail || shouldAbort(branchName)) {
+                if (abortPipeline || shouldAbort(branchName)) {
                     error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
                 } else {
-                    echo "Continuando con el pipeline a pesar de la falla en el Quality Gate."
+                    echo "Continuando con el pipeline a pesar de la falla."
                 }
             } else {
                 echo "Quality Gate aprobado"
