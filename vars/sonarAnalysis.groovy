@@ -3,8 +3,6 @@ def call(Map config = [:]) {
     def abortPipeline = config.get('abortPipeline', false)
     def abortOnQualityGateFail = config.get('abortOnQualityGateFail', false)
 
-    echo "Ejecución de las pruebas de calidad de código"
-
     // Usar el entorno de SonarQube configurado en Jenkins
     withSonarQubeEnv('Sonar Local') {
         try {
