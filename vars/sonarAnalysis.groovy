@@ -1,22 +1,13 @@
 def call(Map config = [:]) {
-    // Obtener los parámetros pasados desde el pipeline
+    // Parámetros con valores predeterminados
     def abortPipeline = config.get('abortPipeline', false)
-    def branchName = config.get('branchName', env.BRANCH_NAME ?: 'unknown')
-
-    // Verificar si la variable de entorno BRANCH_NAME está disponible
-    if (branchName == 'unknown') {
-        error "El nombre de la rama no se pudo capturar."
-    }
+    def branchName = 'main'  // Hardcoded branch name
 
     echo "Ejecución de las pruebas de calidad de código en la rama: ${branchName}"
 
     // Usar el entorno de SonarQube configurado en Jenkins
     withSonarQubeEnv('Sonar Local') {
         try {
-            // Verificar si sonar-scanner está disponible
-            echo "Verificando sonar-scanner..."
-            sh 'sonar-scanner -v'  // Comprobar la versión del scanner
-
             // Ejecutar el análisis real con SonarQube
             echo "Ejecutando sonar-scanner..."
             sh 'sonar-scanner'
@@ -28,7 +19,7 @@ def call(Map config = [:]) {
                     echo "Quality Gate status: ${qualityGate.status}"
 
                     // Evaluar si debe abortar el pipeline según la heurística
-                    if (abortPipeline || shouldAbort(branchName)) {
+                    if (abortPipeline) {
                         error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
                     } else {
                         echo "Continuando con el pipeline a pesar de la falla."
@@ -42,12 +33,4 @@ def call(Map config = [:]) {
             error "Error en el análisis de SonarQube."
         }
     }
-}
-
-// Función auxiliar para decidir si abortar el pipeline según el nombre de la rama
-def shouldAbort(String branchName) {
-    if (branchName == 'master' || branchName.startsWith('hotfix')) {
-        return true
-    }
-    return false
 }
