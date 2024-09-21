@@ -16,9 +16,9 @@ def call(Map config = [:]) {
                     -Dsonar.host.url=http://localhost:9000 \
                     -Dsonar.login=${SONAR_TOKEN}'''
                 
-                // Añadir un pequeño delay antes de esperar el Quality Gate
-                echo "Durmiendo 5 segundos antes de esperar el Quality Gate..."
-                sleep(time: 5, unit: 'SECONDS')
+                // Aumentar el delay antes de esperar el Quality Gate
+                echo "Durmiendo 15 segundos antes de esperar el Quality Gate..."
+                sleep(time: 15, unit: 'SECONDS')
 
                 // Esperar el resultado del Quality Gate con timeout de 5 minutos
                 timeout(time: 5, unit: 'MINUTES') {
