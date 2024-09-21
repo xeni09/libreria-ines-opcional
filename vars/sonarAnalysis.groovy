@@ -11,12 +11,12 @@ def call(Map config = [:]) {
             // Ejecutar el análisis real con SonarQube
             echo "Ejecutando sonar-scanner..."
             sh '''sonar-scanner \
-                    -Dsonar.projectKey=threepoints_devops_webserver_ines \
-                    -Dsonar.projectName="DevOps Web Server Ines" \
-                    -Dsonar.sources=./src \
-                    -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=${SONAR_TOKEN}'''
-
+                -Dsonar.projectKey=threepoints_devops_webserver_ines \
+                -Dsonar.projectName="DevOps Web Server Ines" \
+                -Dsonar.sources=./src \
+                -Dsonar.host.url=http://localhost:9000 \
+                -Dsonar.login=${SONAR_TOKEN}'''
+            
             // Añadir un pequeño delay antes de esperar el Quality Gate
             echo "Durmiendo 5 segundos antes de esperar el Quality Gate..."
             sleep(time: 5, unit: 'SECONDS')
