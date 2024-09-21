@@ -1,29 +1,27 @@
 def call(Map config = [:]) {
-    // Parámetros con valores predeterminados
     def abortPipeline = config.get('abortPipeline', false)
-    def branchName = 'main'  // Hardcoded branch name
 
-    echo "Ejecución de las pruebas de calidad de código en la rama: ${branchName}"
+    echo "Ejecución de las pruebas de calidad de código en la rama: ${env.BRANCH_NAME}"
 
-    // Usar el entorno de SonarQube configurado en Jenkins
     withSonarQubeEnv('Sonar Local') {
         try {
-            // Ejecutar el análisis real con SonarQube
-            echo "Ejecutando sonar-scanner..."
-            sh 'sonar-scanner'
+            // Define las propiedades de Sonar con la configuración conocida
+            sh '''
+                sonar-scanner \
+                -Dsonar.projectKey=threepoints_devops_webserver_ines \
+                -Dsonar.projectName="DevOps Web Server Ines" \
+                -Dsonar.sources=./src \
+                -Dsonar.host.url=http://localhost:9000 \
+                -Dsonar.login=YOUR_SONAR_TOKEN
+            '''
 
-            // Añadir sleep para dar tiempo al análisis
-            sh 'sleep 10'  // Sleep por 10 segundos (ajustable según las necesidades)
-
-            // Esperar el resultado del Quality Gate dentro del mismo entorno de SonarQube
+            // Esperar el resultado del Quality Gate con timeout
             timeout(time: 5, unit: 'MINUTES') {
                 def qualityGate = waitForQualityGate()
                 if (qualityGate.status != 'OK') {
                     echo "Quality Gate status: ${qualityGate.status}"
-
-                    // Evaluar si debe abortar el pipeline según la heurística
                     if (abortPipeline) {
-                        error "Abortando el pipeline debido a la falla en el Quality Gate en la rama: ${branchName}"
+                        error "Abortando el pipeline debido a la falla en el Quality Gate"
                     } else {
                         echo "Continuando con el pipeline a pesar de la falla."
                     }
