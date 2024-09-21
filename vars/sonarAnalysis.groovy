@@ -12,7 +12,10 @@ def call(Map config = [:]) {
             echo "Ejecutando sonar-scanner..."
             sh 'sonar-scanner'
 
-            // Esperar el resultado del Quality Gate con timeout de 5 minutos
+            // Añadir sleep para dar tiempo al análisis
+            sh 'sleep 10'  // Sleep por 10 segundos (ajustable según las necesidades)
+
+            // Esperar el resultado del Quality Gate dentro del mismo entorno de SonarQube
             timeout(time: 5, unit: 'MINUTES') {
                 def qualityGate = waitForQualityGate()
                 if (qualityGate.status != 'OK') {
